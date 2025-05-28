@@ -12,6 +12,7 @@
 	<modules>
 		<module>userService</module>
 		<module>eurekaService</module>
+		<module>gateway</module>
 	</modules>
 	<groupId>com.project</groupId>
 	<artifactId>taskFlow</artifactId>

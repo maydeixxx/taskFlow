@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="eurekaService" />
+        <module name="gateway" />
       </profile>
       <profile name="Annotation profile for taskFlow" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -25,6 +26,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="eurekaService" options="-parameters" />
+      <module name="gateway" options="-parameters" />
       <module name="taskFlow" options="" />
       <module name="userService" options="-parameters" />
     </option>
