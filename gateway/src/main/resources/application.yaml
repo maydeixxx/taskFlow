@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: userService
+            uri: lb://userService
+            predicates:
+              - Path=/all_users, /save_user, /user_id/**, /delete_user/**, /update_user/**, /user_role/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+server:
+  port: 9090
