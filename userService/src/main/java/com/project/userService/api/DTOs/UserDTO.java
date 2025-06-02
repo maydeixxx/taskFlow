@@ -1,13 +1,11 @@
-package com.project.userService.api;
+package com.project.userService.api.DTOs;
 
-import com.project.userService.models.valueObject.Role;
 import lombok.Data;
 
 @Data
 public class UserDTO {
-    private Long id;
     private String userName;
     private String password;
+    private String confirmPassword;
     private String email;
-    private Role role;
 }
