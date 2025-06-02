@@ -1,64 +1,83 @@
 package com.project.userService.application.services;
 
-import com.project.userService.application.interfaces.IUserMapper;
-import com.project.userService.application.interfaces.IUserRepository;
-import com.project.userService.application.interfaces.IUserService;
+import com.project.userService.api.DTOs.UserDTO;
+import com.project.userService.application.interfaces.RoleRepository;
+import com.project.userService.application.interfaces.UserRepository;
+import com.project.userService.models.Role;
 import com.project.userService.models.User;
-import com.project.userService.models.UserEntity;
-import com.project.userService.models.valueObject.Role;
-import lombok.AllArgsConstructor;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
-public class UserService implements IUserService {
-    private final IUserRepository repository;
-    private final IUserMapper mapper;
+@RequiredArgsConstructor
+public class UserService implements UserDetailsService {
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder encoder;
 
-    @Override
-    public void saveUser(User user) {
-        repository.save(mapper.domainToEntity(user));
+    public void saveUser(UserDTO regUser) {
+        User user = new User();
+        user.setPassword(encoder.encode(regUser.getPassword()));
+        user.setUsername(regUser.getUserName());
+        user.setEmail(regUser.getEmail());
+        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
+        userRepository.save(user);
     }
 
-    @Override
     public void deleteUser(Long id) {
-        repository.delete(repository.findUserEntityById(id));
+        userRepository.delete(userRepository.findUserById(id).orElseThrow());
     }
 
-    @Override
     public List<User> findAllUsers() {
-        return repository.findAll().stream()
-                .map(mapper::entityToDomain)
-                .toList();
+        return userRepository.findAll();
     }
 
-    @Override
-    public User findUserById(Long id) {
-        return mapper.entityToDomain(repository.findUserEntityById(id));
+    public Optional<User> findUserById(Long id) {
+        return userRepository.findUserById(id);
     }
 
-    @Override
-    public List<User> findUsersByRole(Role role) {
-        return repository.findUserEntitiesByRole(role).stream()
-                .map(mapper::entityToDomain)
-                .toList();
+    public Optional<List<User>> findUsersByRole(Role role) {
+        return userRepository.findUsersByRoles(role);
     }
 
-    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     public void updateUser(Long id, Map<String, Object> updates) {
-        UserEntity userEntity = repository.findUserEntityById(id);
-        User user = mapper.entityToDomain(userEntity);
+        User user = userRepository.findUserById(id).orElseThrow();
         updates.forEach((key, value) -> {
             switch (key) {
-                case "userName" -> user.setUserName(value.toString());
+                case "userName" -> user.setUsername(value.toString());
                 case "password" -> user.setPassword(value.toString());
                 case "email" -> user.setEmail(value.toString());
-                case "role" -> user.setRole(Role.valueOf(value.toString()));
+            //TODO    case "role" ->
             }
         });
-        repository.save(mapper.domainToEntity(user));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(
+                String.format("User '%s' not found", username)
+        ));
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
+        );
     }
 }

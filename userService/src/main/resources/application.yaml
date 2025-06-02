@@ -9,8 +9,11 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
 
+jwt:
+  secret: qWERTYuiop1234567890qazxswedcvfrtgb
+  lifetime: 30m
 
 eureka:
   client:
