@@ -1,19 +1,15 @@
 spring:
   application:
-    name: userService
+    name: projectService
 
   datasource:
     url: jdbc:postgresql://localhost:5432/taskFlow_db
-    username: postgres
-    password: admin
     driver-class-name: org.postgresql.Driver
+    password: admin
+    username: postgres
   jpa:
     hibernate:
       ddl-auto: validate
-
-jwt:
-  secret: qWERTYuiop1234567890qazxswedcvfrtgb
-  lifetime: 1h
 
 eureka:
   client:
@@ -21,4 +17,4 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 
 server:
-  port: 8080
+  port: 8082

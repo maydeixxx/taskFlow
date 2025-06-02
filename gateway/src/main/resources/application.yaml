@@ -11,6 +11,11 @@ spring:
             predicates:
               - Path=/all_users, /save_user, /user_id/**, /delete_user/**, /update_user/**, /user_role/**
 
+          - id: projectService
+            uri: lb://projectService
+            predicates:
+              - Path=/all_projects, /update_project/**, /project_id/**, /delete_project/**, /save_project
+
 eureka:
   client:
     service-url:

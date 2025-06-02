@@ -1,5 +1,6 @@
 package com.project.userService.application.services;
 
+import com.project.userService.api.DTOs.UpdateUserDTO;
 import com.project.userService.api.DTOs.UserDTO;
 import com.project.userService.application.interfaces.RoleRepository;
 import com.project.userService.application.interfaces.UserRepository;
@@ -14,9 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,16 +54,27 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
-    public void updateUser(Long id, Map<String, Object> updates) {
+    @Transactional
+    public void updateUser(Long id, UpdateUserDTO userDTO) {
         User user = userRepository.findUserById(id).orElseThrow();
-        updates.forEach((key, value) -> {
-            switch (key) {
-                case "userName" -> user.setUsername(value.toString());
-                case "password" -> user.setPassword(value.toString());
-                case "email" -> user.setEmail(value.toString());
-            //TODO    case "role" ->
+        if (userDTO.getPassword() != null) {
+            user.setPassword(userDTO.getPassword());
+        }
+        if (userDTO.getUsername() != null) {
+            user.setUsername(userDTO.getUsername());
+        }
+        if (userDTO.getEmail() != null) {
+            user.setEmail(userDTO.getEmail());
+        }
+        if (userDTO.getRoles() != null) {
+            Collection<Role> roles = new ArrayList<>();
+            for (String role : userDTO.getRoles() ) {
+                roles.add(roleRepository.findByName(role)
+                        .orElseThrow(() -> new IllegalArgumentException(String.format("Role with name %s not found", role))));
+                user.getRoles().clear();
+                user.setRoles(roles);
             }
-        });
+        }
         userRepository.save(user);
     }
 
