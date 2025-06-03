@@ -9,7 +9,7 @@ spring:
           - id: userService
             uri: lb://userService
             predicates:
-              - Path=/all_users, /save_user, /user_id/**, /delete_user/**, /update_user/**, /user_role/**
+              - Path=/all_users, /save_user, /user_id/**, /delete_user/**, /update_user/**, /user_role/** ,/add_project/**
 
           - id: projectService
             uri: lb://projectService

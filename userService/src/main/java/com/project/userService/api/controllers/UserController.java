@@ -7,14 +7,14 @@ import com.project.userService.application.services.UserService;
 import com.project.userService.models.Role;
 import com.project.userService.models.User;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/")
 @AllArgsConstructor
@@ -31,6 +31,16 @@ public class UserController {
         }
         userService.saveUser(regUser);
         return ResponseEntity.ok().body(String.format("'%s', вы успешно зарегистрировались!", regUser.getUserName()));
+    }
+
+    @PatchMapping("/add_project/{userId}/{projectId}")
+    public ResponseEntity<?> addProjectToUser(@PathVariable Long userId, @PathVariable Long projectId) {
+        try {
+            userService.addProjectToUser(userId, projectId);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete_user/{id}")

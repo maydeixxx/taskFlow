@@ -1,10 +1,13 @@
 package com.project.projectService.application.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.projectService.application.interfaces.ProjectRepository;
 import com.project.projectService.models.ProjectEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +39,19 @@ public class ProjectService {
             switch (key) {
                 case "title" -> project.setTitle(value.toString());
                 case "body" -> project.setBody(value.toString());
+                case "members" -> {
+                    Collection<Long> members = project.getMembers();
+                    Long member = Long.valueOf(value.toString());
+                    if (members.contains(member)) {
+                        members.remove(member);
+                    } else {
+                        members.add(member);
+                    }
+                    project.setMembers(members);
+                }
                 default -> throw new IllegalArgumentException("Unknown field to update");
             }
         });
+        projectRepository.save(project);
     }
 }

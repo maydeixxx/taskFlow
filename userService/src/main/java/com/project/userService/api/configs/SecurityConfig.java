@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/update_project/**").authenticated()
+                        .requestMatchers("/update_project/**").permitAll()
                         .requestMatchers("/save_project").authenticated()
                         .requestMatchers("/all_projects").authenticated()
                         .requestMatchers("/project_id").authenticated()
@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/users_roles/**").hasRole("ADMIN")
                         .requestMatchers("/auth").permitAll()
                         .requestMatchers("/reg").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

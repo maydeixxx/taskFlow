@@ -6,23 +6,32 @@ import com.project.userService.application.interfaces.RoleRepository;
 import com.project.userService.application.interfaces.UserRepository;
 import com.project.userService.models.Role;
 import com.project.userService.models.User;
+import io.jsonwebtoken.Jwt;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RestTemplate restTemplate;
     private final BCryptPasswordEncoder encoder;
 
     public void saveUser(UserDTO regUser) {
@@ -68,7 +77,7 @@ public class UserService implements UserDetailsService {
         }
         if (userDTO.getRoles() != null) {
             Collection<Role> roles = new ArrayList<>();
-            for (String role : userDTO.getRoles() ) {
+            for (String role : userDTO.getRoles()) {
                 roles.add(roleRepository.findByName(role)
                         .orElseThrow(() -> new IllegalArgumentException(String.format("Role with name %s not found", role))));
                 user.getRoles().clear();
@@ -89,5 +98,39 @@ public class UserService implements UserDetailsService {
                 user.getPassword(),
                 user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
         );
+    }
+
+    public void addProjectToUser(Long userId, Long projectId) {
+        User user = userRepository.findUserById(userId).orElseThrow();
+        Collection<Long> projects = user.getProjects();
+        if (projects.contains(projectId)) {
+            throw new IllegalArgumentException("Project already contains in your list");
+        }
+
+        projects.add(projectId);
+        user.setProjects(projects);
+        userRepository.save(user);
+        String url = "http://localhost:9090/";
+        Map<String, Object> updates = Map.of("members", userId);
+        try {
+            restTemplate.patchForObject(
+                    url + "update_project/" + projectId,
+                    updates,
+                    Void.class
+            );
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public void removeProjectFromUser(Long userId, Long projectId) {
+        User user = userRepository.findUserById(userId).orElseThrow();
+        Collection<Long> projects = user.getProjects();
+        if (!projects.contains(projectId)) {
+            throw new IllegalArgumentException("Project already removed");
+        }
+        projects.remove(projectId);
+        user.setProjects(projects);
+        userRepository.save(user);
     }
 }
