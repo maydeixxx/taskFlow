@@ -1,23 +1,27 @@
 package com.project.projectService.application.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.projectService.application.interfaces.ProjectRepository;
 import com.project.projectService.models.ProjectEntity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectProducer producer;
 
     public void saveProject(ProjectEntity project) {
+        project.setStatus("NOT_STARTED");
         projectRepository.save(project);
+        producer.sendNewProject(project.getMembers(), project.getId());
+        log.info("Отправлено сообщение в saveProjectToUser = {}, {}", project.getMembers(), project.getId());
     }
 
     public void deleteProject(Long id) {
@@ -52,6 +56,17 @@ public class ProjectService {
                 default -> throw new IllegalArgumentException("Unknown field to update");
             }
         });
+        projectRepository.save(project);
+    }
+
+    public void addMember(Long userId, Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow();
+        Collection<Long> members = project.getMembers();
+        if (members.contains(userId)) {
+            log.error("Пользователь уже есть в участниках проекта {}", projectId);
+        }
+        members.add(userId);
+        project.setMembers(members);
         projectRepository.save(project);
     }
 }

@@ -6,20 +6,15 @@ import com.project.userService.application.interfaces.RoleRepository;
 import com.project.userService.application.interfaces.UserRepository;
 import com.project.userService.models.Role;
 import com.project.userService.models.User;
-import io.jsonwebtoken.Jwt;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -31,13 +26,13 @@ import java.util.stream.Collectors;
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final RestTemplate restTemplate;
     private final BCryptPasswordEncoder encoder;
+    private final UserProducer producer;
 
     public void saveUser(UserDTO regUser) {
         User user = new User();
         user.setPassword(encoder.encode(regUser.getPassword()));
-        user.setUsername(regUser.getUserName());
+        user.setUserName(regUser.getUserName());
         user.setEmail(regUser.getEmail());
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
         userRepository.save(user);
@@ -60,7 +55,7 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUserName(username);
     }
 
     @Transactional
@@ -70,7 +65,7 @@ public class UserService implements UserDetailsService {
             user.setPassword(userDTO.getPassword());
         }
         if (userDTO.getUsername() != null) {
-            user.setUsername(userDTO.getUsername());
+            user.setUserName(userDTO.getUsername());
         }
         if (userDTO.getEmail() != null) {
             user.setEmail(userDTO.getEmail());
@@ -84,6 +79,9 @@ public class UserService implements UserDetailsService {
                 user.setRoles(roles);
             }
         }
+        if (userDTO.getProjects() != null) {
+            user.setProjects(userDTO.getProjects());
+        }
         userRepository.save(user);
     }
 
@@ -94,33 +92,24 @@ public class UserService implements UserDetailsService {
                 String.format("User '%s' not found", username)
         ));
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
+                user.getUserName(),
                 user.getPassword(),
                 user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
         );
     }
 
-    public void addProjectToUser(Long userId, Long projectId) {
+    public void addProjectToUser(Long userId, Long projectId, int partition) {
         User user = userRepository.findUserById(userId).orElseThrow();
         Collection<Long> projects = user.getProjects();
         if (projects.contains(projectId)) {
             throw new IllegalArgumentException("Project already contains in your list");
         }
-
+        if (partition == 1) {
+           producer.sendUserToSubscribe(userId, projectId);
+        }
         projects.add(projectId);
         user.setProjects(projects);
         userRepository.save(user);
-        String url = "http://localhost:9090/";
-        Map<String, Object> updates = Map.of("members", userId);
-        try {
-            restTemplate.patchForObject(
-                    url + "update_project/" + projectId,
-                    updates,
-                    Void.class
-            );
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
     }
 
     public void removeProjectFromUser(Long userId, Long projectId) {

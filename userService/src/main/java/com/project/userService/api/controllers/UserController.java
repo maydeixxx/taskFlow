@@ -30,13 +30,13 @@ public class UserController {
             return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "пользователь с таким именем уже сущетсвует", new Date()), HttpStatus.UNAUTHORIZED);
         }
         userService.saveUser(regUser);
-        return ResponseEntity.ok().body(String.format("'%s', вы успешно зарегистрировались!", regUser.getUserName()));
+        return ResponseEntity.ok().body(String.format("%s, вы успешно зарегистрировались!", regUser.getUserName()));
     }
 
     @PatchMapping("/add_project/{userId}/{projectId}")
     public ResponseEntity<?> addProjectToUser(@PathVariable Long userId, @PathVariable Long projectId) {
         try {
-            userService.addProjectToUser(userId, projectId);
+            userService.addProjectToUser(userId, projectId, 1);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -58,7 +58,7 @@ public class UserController {
         }
         User userById = userService.findUserById(id).orElseThrow();
         return ResponseEntity.ok().body(String.format("User successfully updated!\n Name: %s\n Email: %s\n Roles: %s"
-                , userById.getUsername(), userById.getEmail(), userById.getRoles()));
+                , userById.getUserName(), userById.getEmail(), userById.getRoles()));
     }
 
     @GetMapping("/all_users")

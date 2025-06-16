@@ -20,6 +20,9 @@ public class ProjectEntity {
     @Column(name = "body")
     private String body;
 
+    @Column(name = "status")
+    private String status; //STARTED, NOT_STARTED, DONE
+
     @ElementCollection
     @CollectionTable(name = "project_members",
             joinColumns = @JoinColumn(name = "project_id")

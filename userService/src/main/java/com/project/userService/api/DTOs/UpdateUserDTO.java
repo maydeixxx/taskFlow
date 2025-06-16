@@ -2,6 +2,7 @@ package com.project.userService.api.DTOs;
 
 import lombok.Data;
 
+import java.util.Collection;
 import java.util.List;
 
 @Data
@@ -11,4 +12,5 @@ public class UpdateUserDTO {
     private String password;
     private String email;
     private List<String> roles;
+    private Collection<Long> projects;
 }
