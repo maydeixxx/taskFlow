@@ -9,7 +9,12 @@ spring:
           - id: userService
             uri: lb://userService
             predicates:
-              - Path=/all_users, /save_user, /user_id/**, /delete_user/**, /update_user/**, /user_role/**
+              - Path=/all_users, /save_user, /user_id/**, /delete_user/**, /update_user/**, /users_role/** ,/add_project/**, /reg, /auth, /remove_project/**
+
+          - id: projectService
+            uri: lb://projectService
+            predicates:
+              - Path=/all_projects, /update_project/**, /project_id/**, /delete_project/**, /save_project
 
 eureka:
   client:

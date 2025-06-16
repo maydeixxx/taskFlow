@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
-    private final UserService userService;
     private final JwtFilter jwtFilter;
 
     @Bean
@@ -29,8 +28,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/secured").authenticated()
+                        .requestMatchers("/update_project/**").permitAll()
+                        .requestMatchers("/save_project").authenticated()
+                        .requestMatchers("/all_projects").authenticated()
+                        .requestMatchers("/project_id").authenticated()
+                        .requestMatchers("/all_users").hasRole("ADMIN")
+                        .requestMatchers("/delete_user/**").hasRole("ADMIN")
+                        .requestMatchers("/user_id/**").hasRole("ADMIN")
+                        .requestMatchers("/users_roles/**").hasRole("ADMIN")
+                        .requestMatchers("/auth").permitAll()
+                        .requestMatchers("/reg").permitAll()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

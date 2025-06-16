@@ -13,6 +13,7 @@
 		<module>userService</module>
 		<module>eurekaService</module>
 		<module>gateway</module>
+        <module>projectService</module>
 	</modules>
 	<groupId>com.project</groupId>
 	<artifactId>taskFlow</artifactId>
@@ -39,6 +40,15 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
 		</dependency>
 
 		<dependency>

@@ -15,7 +15,7 @@ public class User {
     private Long id;
 
     @Column(name = "username")
-    private String username;
+    private String userName;
 
     @Column(name = "password")
     private String password;
@@ -30,4 +30,11 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Collection<Role> roles;
+
+    @ElementCollection
+    @CollectionTable(name = "user_projects",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "project_id")
+    private Collection<Long> projects;
 }
