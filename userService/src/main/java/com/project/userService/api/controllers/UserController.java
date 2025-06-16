@@ -43,6 +43,16 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/remove_project/{userId}/{projectId}")
+    public ResponseEntity<?> removeProject(@PathVariable Long projectId, @PathVariable Long userId) {
+        try {
+            userService.removeProjectFromUser(userId, projectId);
+            return ResponseEntity.ok(String.format("Project %s removed from user %s", projectId, userId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/delete_user/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

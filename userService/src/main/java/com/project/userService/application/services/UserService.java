@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -113,7 +112,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void removeProjectFromUser(Long userId, Long projectId) {
-        User user = userRepository.findUserById(userId).orElseThrow();
+        User user = userRepository.findUserById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         Collection<Long> projects = user.getProjects();
         if (!projects.contains(projectId)) {
             throw new IllegalArgumentException("Project already removed");
