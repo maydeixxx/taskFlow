@@ -14,7 +14,7 @@ spring:
           - id: projectService
             uri: lb://projectService
             predicates:
-              - Path=/all_projects, /update_project/**, /project_id/**, /delete_project/**, /save_project
+              - Path=/all_projects, /update_project/**, /project_id/**, /delete_project/**, /save_project, /members/**
 
 eureka:
   client:

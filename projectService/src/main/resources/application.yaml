@@ -9,7 +9,7 @@ spring:
     username: postgres
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
 
   kafka:
     bootstrap-servers: localhost:9092

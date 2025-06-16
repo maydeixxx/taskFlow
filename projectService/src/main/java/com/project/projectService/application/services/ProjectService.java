@@ -2,6 +2,7 @@ package com.project.projectService.application.services;
 
 import com.project.projectService.application.interfaces.ProjectRepository;
 import com.project.projectService.models.ProjectEntity;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -68,5 +69,10 @@ public class ProjectService {
         members.add(userId);
         project.setMembers(members);
         projectRepository.save(project);
+    }
+
+    public Collection<Long> getMembers(Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() -> new NotFoundException(String.format("Project %s not found", projectId)));
+        return project.getMembers();
     }
 }
