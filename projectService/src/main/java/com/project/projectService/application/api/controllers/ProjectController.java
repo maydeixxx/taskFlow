@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -62,5 +63,15 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable Long id) {
         projectService.deleteProject(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/members/{projectId}")
+    public ResponseEntity<?> getMembers(@PathVariable Long projectId) {
+        try {
+            Collection<Long> members = projectService.getMembers(projectId);
+            return ResponseEntity.ok(String.format("Members of project %s:\n%s", projectId, members));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
