@@ -1,6 +1,6 @@
 spring:
   application:
-    name: userService
+    name: taskService
 
   datasource:
     url: jdbc:postgresql://localhost:5432/taskFlow_db
@@ -20,14 +20,10 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-jwt:
-  secret: qWERTYuiop1234567890qazxswedcvfrtgb
-  lifetime: 1h
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka/
 
 server:
-  port: 8080
+  port: 8083

@@ -1,6 +1,6 @@
-package com.project.projectService.application.api.controllers;
+package com.project.projectService.api.controllers;
 
-import com.project.projectService.application.api.DTOs.ProjectDTO;
+import com.project.projectService.api.DTOs.ProjectDTO;
 import com.project.projectService.application.interfaces.ProjectMapper;
 import com.project.projectService.application.services.ProjectService;
 import com.project.projectService.models.ProjectEntity;
@@ -46,7 +46,7 @@ public class ProjectController {
         return ResponseEntity.ok(mapper.entityToDto(byId));
     }
 
-    @PatchMapping("/update_project/{id}")
+    @PutMapping("/update_project/{id}")
     public ResponseEntity<?> updateProject(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         try {
             projectService.updateProject(id, updates);

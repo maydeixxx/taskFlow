@@ -37,4 +37,11 @@ public class User {
     )
     @Column(name = "project_id")
     private Collection<Long> projects;
+
+    @ElementCollection
+    @CollectionTable(name = "user_tasks",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "task_id")
+    private Collection<Long> tasks;
 }

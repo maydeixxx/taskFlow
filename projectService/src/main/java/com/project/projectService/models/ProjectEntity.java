@@ -23,10 +23,17 @@ public class ProjectEntity {
     @Column(name = "status")
     private String status; //STARTED, NOT_STARTED, DONE
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "project_members",
             joinColumns = @JoinColumn(name = "project_id")
     )
     @Column(name = "user_id")
     private Collection<Long> members;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "project_tasks",
+            joinColumns = @JoinColumn(name = "project_id")
+    )
+    @Column(name = "task_id")
+    private Collection<Long> tasks;
 }

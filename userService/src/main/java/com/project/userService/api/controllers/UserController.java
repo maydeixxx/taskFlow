@@ -33,7 +33,7 @@ public class UserController {
         return ResponseEntity.ok().body(String.format("%s, вы успешно зарегистрировались!", regUser.getUserName()));
     }
 
-    @PatchMapping("/add_project/{userId}/{projectId}")
+    @PutMapping("/add_project/{userId}/{projectId}")
     public ResponseEntity<?> addProjectToUser(@PathVariable Long userId, @PathVariable Long projectId) {
         try {
             userService.addProjectToUser(userId, projectId, 1);
@@ -43,7 +43,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/remove_project/{userId}/{projectId}")
+    @PutMapping("/remove_project/{userId}/{projectId}")
     public ResponseEntity<?> removeProject(@PathVariable Long projectId, @PathVariable Long userId) {
         try {
             userService.removeProjectFromUser(userId, projectId);
@@ -59,7 +59,7 @@ public class UserController {
         return ResponseEntity.ok().body(String.format("User by id = %s deleted", id));
     }
 
-    @PatchMapping("/update_user/{id}")
+    @PutMapping("/update_user/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserDTO userDTO) {
         try {
             userService.updateUser(id, userDTO);
