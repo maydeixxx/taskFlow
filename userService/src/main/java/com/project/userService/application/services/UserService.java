@@ -125,12 +125,10 @@ public class UserService implements UserDetailsService {
 
     public void addTaskToUser(Long userId, Long taskId) {
         User user = userRepository.findUserById(userId).orElseThrow(() -> new NotFoundException(String.format("User %s not found", userId)));
-        Collection<Long> tasks = user.getTasks();
-        if (tasks.contains(taskId)) {
-            throw new IllegalArgumentException("Task already contains");
+        if (user.getTaskId() != null) {
+            throw new IllegalArgumentException("User already have task");
         }
-        tasks.add(taskId);
-        user.setTasks(tasks);
+        user.setTaskId(taskId);
         userRepository.save(user);
     }
 }

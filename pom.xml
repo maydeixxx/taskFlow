@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<packaging>pom</packaging>
 	<modules>
@@ -15,6 +15,7 @@
 		<module>gateway</module>
         <module>projectService</module>
 		<module>taskService</module>
+		<module>analyticsService</module>
 	</modules>
 	<groupId>com.project</groupId>
 	<artifactId>taskFlow</artifactId>

@@ -24,8 +24,8 @@ public class TaskService {
         taskRepository.save(task);
         Long taskId = task.getId();
         Long projectId = task.getProjectId();
-        Set<Long> members = task.getMembers();
-        producer.saveTaskToProject(projectId, taskId, members);
+        Long memberId = task.getMemberId();
+        producer.saveTaskToProject(projectId, taskId, memberId);
     }
 
     public void deleteTask(Long id) {
@@ -38,10 +38,15 @@ public class TaskService {
         switch (taskUpdate.getField()) {
             case "title" -> task.setTitle(taskUpdate.getTitle());
             case "body" -> task.setBody(taskUpdate.getBody());
-            case "status" -> task.setStatus(taskUpdate.getStatus());
+            case "status" -> {
+                task.setStatus(taskUpdate.getStatus());
+                if (taskUpdate.getStatus().equals("DONE")) {
+                    producer.sendCompletedTasks(task.getId(), task);
+                }
+            }
             case "deadline" -> task.setDeadline(taskUpdate.getDeadline());
             case "members" ->  {
-                task.setMembers(taskUpdate.getMembers());
+                task.setMemberId(taskUpdate.getMemberId());
             }
         }
         taskRepository.save(task);

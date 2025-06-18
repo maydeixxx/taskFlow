@@ -27,8 +27,7 @@ public class UserConsumer {
     public void saveProjectToUser(ConsumerRecord<String, String> record) {
         try {
             log.info("Partition = {}", record.partition());
-            Collection<Long> userIds = objectMapper.readValue(record.key(), new TypeReference<Collection<Long>>() {
-            });
+            Collection<Long> userIds = objectMapper.readValue(record.key(), new TypeReference<Collection<Long>>() {});
             Long projectId = Long.parseLong(record.value());
             log.info("Получено сообщение в saveProjectToUser = {}, {}", userIds, projectId);
             userIds.forEach(id -> userService.addProjectToUser(id, projectId, 0));
@@ -42,13 +41,8 @@ public class UserConsumer {
     public void handleTaskSub(ConsumerRecord<String, String> record) {
         log.info("MESSAGE = {}", record.value());
         Long taskId = Long.parseLong(record.key());
-        try {
-            Set<Long> members = objectMapper.readValue(record.value(), new TypeReference<Set<Long>>() {
-            });
-            members.forEach(id -> userService.addTaskToUser(id, taskId));
-            log.info("USERS UPDATED");
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
-        }
+        Long userId = Long.parseLong(record.value());
+        userService.addTaskToUser(userId, taskId);
+        log.info("USERS UPDATED");
     }
 }
