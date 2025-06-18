@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -22,35 +23,32 @@ public class UserConsumer {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    @KafkaListener(topics = "saveProjectToUser", groupId = "subsToProjects")
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "saveProjectToUser", partitions = {"0"}), groupId = "subsToProjects")
     public void saveProjectToUser(ConsumerRecord<String, String> record) {
         try {
             log.info("Partition = {}", record.partition());
-            if (record.partition() == 0) {
-                Collection<Long> userIds = objectMapper.readValue(record.key(), new TypeReference<Collection<Long>>() {
-                });
-                Long projectId = Long.parseLong(record.value());
-                log.info("Получено сообщение в saveProjectToUser = {}, {}", userIds, projectId);
-                userIds.forEach(id -> userService.addProjectToUser(id, projectId, 0));
-            }
+            Collection<Long> userIds = objectMapper.readValue(record.key(), new TypeReference<Collection<Long>>() {
+            });
+            Long projectId = Long.parseLong(record.value());
+            log.info("Получено сообщение в saveProjectToUser = {}, {}", userIds, projectId);
+            userIds.forEach(id -> userService.addProjectToUser(id, projectId, 0));
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }
     }
 
     @Transactional
-    @KafkaListener(topics = "saveTaskToProject", groupId = "subsToTask")
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "saveTaskToProject", partitions = {"1"}), groupId = "subsToTask")
     public void handleTaskSub(ConsumerRecord<String, String> record) {
         log.info("MESSAGE = {}", record.value());
-        if (record.partition() == 1) {
-            Long taskId = Long.parseLong(record.key());
-            try {
-                Set<Long> members = objectMapper.readValue(record.value(), new TypeReference<Set<Long>>() {});
-                members.forEach(id -> userService.addTaskToUser(id, taskId));
-                log.info("USERS UPDATED");
-            } catch (JsonProcessingException e) {
-                log.error(e.getMessage());
-            }
+        Long taskId = Long.parseLong(record.key());
+        try {
+            Set<Long> members = objectMapper.readValue(record.value(), new TypeReference<Set<Long>>() {
+            });
+            members.forEach(id -> userService.addTaskToUser(id, taskId));
+            log.info("USERS UPDATED");
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
         }
     }
 }
