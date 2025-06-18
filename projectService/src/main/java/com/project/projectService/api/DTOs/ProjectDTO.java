@@ -1,4 +1,4 @@
-package com.project.projectService.application.api.DTOs;
+package com.project.projectService.api.DTOs;
 
 import lombok.Data;
 
@@ -11,4 +11,5 @@ public class ProjectDTO {
     private String body;
     private String status;
     private Collection<Long> members;
+    private Collection<Long> tasks;
 }

@@ -16,6 +16,12 @@ spring:
             predicates:
               - Path=/all_projects, /update_project/**, /project_id/**, /delete_project/**, /save_project, /members/**
 
+          - id: taskService
+            uri: lb://taskService
+            predicates:
+              - Path=/all_tasks, /project/**, /save_task, /task_id/**, /update_task/**
+
+
 eureka:
   client:
     service-url:

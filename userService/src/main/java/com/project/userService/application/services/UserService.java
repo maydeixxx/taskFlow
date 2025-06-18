@@ -7,6 +7,7 @@ import com.project.userService.application.interfaces.UserRepository;
 import com.project.userService.models.Role;
 import com.project.userService.models.User;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -119,6 +120,17 @@ public class UserService implements UserDetailsService {
         }
         projects.remove(projectId);
         user.setProjects(projects);
+        userRepository.save(user);
+    }
+
+    public void addTaskToUser(Long userId, Long taskId) {
+        User user = userRepository.findUserById(userId).orElseThrow(() -> new NotFoundException(String.format("User %s not found", userId)));
+        Collection<Long> tasks = user.getTasks();
+        if (tasks.contains(taskId)) {
+            throw new IllegalArgumentException("Task already contains");
+        }
+        tasks.add(taskId);
+        user.setTasks(tasks);
         userRepository.save(user);
     }
 }

@@ -1,7 +1,6 @@
 package com.project.userService.api.configs;
 
 import com.project.userService.api.components.JwtFilter;
-import com.project.userService.application.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,17 +27,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/update_project/**").permitAll()
-                        .requestMatchers("/save_project").authenticated()
-                        .requestMatchers("/all_projects").authenticated()
-                        .requestMatchers("/project_id").authenticated()
                         .requestMatchers("/all_users").hasRole("ADMIN")
                         .requestMatchers("/delete_user/**").hasRole("ADMIN")
                         .requestMatchers("/user_id/**").hasRole("ADMIN")
                         .requestMatchers("/users_roles/**").hasRole("ADMIN")
                         .requestMatchers("/auth").permitAll()
                         .requestMatchers("/reg").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

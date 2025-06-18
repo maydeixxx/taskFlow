@@ -75,4 +75,14 @@ public class ProjectService {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() -> new NotFoundException(String.format("Project %s not found", projectId)));
         return project.getMembers();
     }
+
+    public void addTaskToProject(Long taskId, Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() -> new NotFoundException(String.format("Project %s not found", projectId)));
+        Collection<Long> tasks = project.getTasks();
+        if (tasks.contains(taskId)) {
+            throw new IllegalArgumentException(String.format("Project %s already contains task %s", projectId, taskId));
+        }
+        tasks.add(taskId);
+        project.setTasks(tasks);
+    }
 }
