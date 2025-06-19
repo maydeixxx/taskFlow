@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +25,7 @@ public class TaskService {
         Long projectId = task.getProjectId();
         Long memberId = task.getMemberId();
         producer.saveTaskToProject(projectId, taskId, memberId);
+        producer.sendTaskToAnalytics(taskId, task);
     }
 
     public void deleteTask(Long id) {
@@ -41,7 +41,7 @@ public class TaskService {
             case "status" -> {
                 task.setStatus(taskUpdate.getStatus());
                 if (taskUpdate.getStatus().equals("DONE")) {
-                    producer.sendCompletedTasks(task.getId(), task);
+                    producer.sendCompletedTaskToAnalytics(task.getId(), task);
                 }
             }
             case "deadline" -> task.setDeadline(taskUpdate.getDeadline());

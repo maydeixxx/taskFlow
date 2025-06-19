@@ -24,4 +24,13 @@ public class AnalyticsController {
         }
         return ResponseEntity.ok(usersStatistic);
     }
+
+    @GetMapping("/project/{id}")
+    public ResponseEntity<?> getProjectStatistic(@PathVariable Long id) {
+        Map<String, Object> projectStatistic = service.calculateProjectStatistic(id);
+        if (projectStatistic == null) {
+            return ResponseEntity.badRequest().body(String.format("Statistic of project %s empty", id));
+        }
+        return ResponseEntity.ok(projectStatistic);
+    }
 }

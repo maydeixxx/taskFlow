@@ -2,7 +2,6 @@ package com.project.taskService.application.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.taskService.api.DTOs.TaskDTO;
 import com.project.taskService.models.TaskEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +23,21 @@ public class TaskProducer {
         template.send("saveTaskToProject", 1, taskId.toString(), memberId.toString());
     }
 
-    public void sendCompletedTasks(Long taskId, TaskEntity taskEntity) {
+    public void sendTaskToAnalytics(Long taskId, TaskEntity taskEntity) {
         Map<String, Object> task = formatTaskToMap(taskEntity);
         try {
             String message = objectMapper.writeValueAsString(task);
-            template.send("taskCompleted", taskId.toString(), message);
+            template.send("taskAnalytics", taskId.toString(), message);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public void sendCompletedTaskToAnalytics(Long taskId, TaskEntity task) {
+        Map<String, Object> taskToMap = formatTaskToMap(task);
+        try {
+            String message = objectMapper.writeValueAsString(taskToMap);
+            template.send("completedTasks", taskId.toString(), message);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
         }
