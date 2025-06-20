@@ -12,6 +12,6 @@ public class TaskDTO {
     private String body;
     private String status; //TO_DO, IN_PROGRESS, DONE
     private LocalDate deadline;
-    private Set<Long> members;
+    private Long memberId;
     private Long projectId;
 }

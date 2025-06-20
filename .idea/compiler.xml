@@ -10,6 +10,15 @@
         <module name="eurekaService" />
         <module name="gateway" />
       </profile>
+      <profile name="Annotation profile for analyticsService" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="analyticsService" />
+      </profile>
       <profile name="Annotation profile for taskFlow" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -27,6 +36,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="analyticsService" options="-parameters" />
       <module name="eurekaService" options="-parameters" />
       <module name="gateway" options="-parameters" />
       <module name="projectService" options="-parameters" />

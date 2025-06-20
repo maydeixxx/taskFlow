@@ -26,12 +26,11 @@ public class TaskEntity {
     @Column(name = "deadline")
     private LocalDate deadline;
 
-    @ElementCollection
-    @CollectionTable(name = "task_members",
+    @CollectionTable(name = "task_member",
                     joinColumns = @JoinColumn(name = "task_id")
     )
     @Column(name = "user_id")
-    private Set<Long> members;
+    private Long memberId;
 
     @Column(name = "project_id")
     private Long projectId;
