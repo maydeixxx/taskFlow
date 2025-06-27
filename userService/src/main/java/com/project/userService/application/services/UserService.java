@@ -35,7 +35,8 @@ public class UserService implements UserDetailsService {
         user.setUserName(regUser.getUserName());
         user.setEmail(regUser.getEmail());
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        producer.sendRegisteredUser(savedUser);
     }
 
     public void deleteUser(Long id) {

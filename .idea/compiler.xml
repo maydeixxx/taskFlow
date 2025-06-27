@@ -10,6 +10,15 @@
         <module name="eurekaService" />
         <module name="gateway" />
       </profile>
+      <profile name="Annotation profile for notificationService" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="notificationService" />
+      </profile>
       <profile name="Annotation profile for analyticsService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -39,6 +48,7 @@
       <module name="analyticsService" options="-parameters" />
       <module name="eurekaService" options="-parameters" />
       <module name="gateway" options="-parameters" />
+      <module name="notificationService" options="-parameters" />
       <module name="projectService" options="-parameters" />
       <module name="taskFlow" options="" />
       <module name="taskService" options="-parameters" />
