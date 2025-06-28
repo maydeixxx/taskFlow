@@ -1,15 +1,19 @@
 package com.project.projectService.application.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.projectService.application.interfaces.ProjectRepository;
 import com.project.projectService.models.ProjectEntity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -17,12 +21,36 @@ import java.util.Map;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectProducer producer;
+    private final ObjectMapper objectMapper;
+    private final List<Map<String, Object>> cachedUsers = new ArrayList<>();
 
     public void saveProject(ProjectEntity project) {
         project.setStatus("NOT_STARTED");
         projectRepository.save(project);
         producer.sendNewProject(project.getMembers(), project.getId());
-        log.info("Отправлено сообщение в saveProjectToUser = {}, {}", project.getMembers(), project.getId());
+        log.info("Sent message to saveProjectToUser = {}, {}", project.getMembers(), project.getId());
+        //notification
+        try {
+            Thread.sleep(1500);
+            String message = objectMapper.writeValueAsString(cachedUsers);
+            producer.sendNewProjectToNotification(project.getId(), message);
+            log.info("USERS FOR PROJECT {}: [ {} ]", project.getId(), cachedUsers);
+            cachedUsers.clear();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "usernames", partitions = {"0"}), groupId = "usernames")
+    public void getUsernamesResponse(ConsumerRecord<String, String> record) {
+        try {
+            List<Map<String, Object>> users = objectMapper.readValue(record.value(), new TypeReference<>() {});
+            log.info("USERS FROM RECORD[ {} ]", users);
+            cachedUsers.addAll(users);
+            log.info("CACHED USERS: {}", cachedUsers);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void deleteProject(Long id) {

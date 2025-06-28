@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
     public void saveUser(UserDTO regUser) {
         User user = new User();
         user.setPassword(encoder.encode(regUser.getPassword()));
-        user.setUserName(regUser.getUserName());
+        user.setUsername(regUser.getUserName());
         user.setEmail(regUser.getEmail());
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
         User savedUser = userRepository.save(user);
@@ -56,7 +56,7 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUserName(username);
+        return userRepository.findByUsername(username);
     }
 
     @Transactional
@@ -66,7 +66,7 @@ public class UserService implements UserDetailsService {
             user.setPassword(userDTO.getPassword());
         }
         if (userDTO.getUsername() != null) {
-            user.setUserName(userDTO.getUsername());
+            user.setUsername(userDTO.getUsername());
         }
         if (userDTO.getEmail() != null) {
             user.setEmail(userDTO.getEmail());
@@ -93,7 +93,7 @@ public class UserService implements UserDetailsService {
                 String.format("User '%s' not found", username)
         ));
         return new org.springframework.security.core.userdetails.User(
-                user.getUserName(),
+                user.getUsername(),
                 user.getPassword(),
                 user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
         );

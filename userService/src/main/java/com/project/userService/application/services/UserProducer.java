@@ -35,7 +35,7 @@ public class UserProducer {
         return
                 Map.of(
                         "id", user.getId(),
-                        "username", user.getUserName(),
+                        "username", user.getUsername(),
                         "email", user.getEmail()
                 );
     }

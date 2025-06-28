@@ -26,6 +26,7 @@ public class NotificationService {
             case "newTask" -> sendNewTaskEmail(event);
             case "reminder" -> sendReminderMail(event);
             case "registration" -> sendRegMail(event);
+            case "newProject" -> sendNewProjectEmail(event);
             default -> throw new IllegalArgumentException("Unknown type of event");
         }
         log.info("Sent messages");
@@ -81,6 +82,22 @@ public class NotificationService {
         }
     }
 
+    private void sendNewProjectEmail(NotificationEvent event) {
+        String email = event.getEmail();
+        String username = event.getUsername();
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            helper.setSubject(String.format("You assigned to new project, %s!", username));
+            helper.setTo(email);
+            String content = getNewProjectEmailContent(event);
+            helper.setText(content, true);
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String getNewTaskEmailContent(NotificationEvent event) {
         StringWriter stringWriter = new StringWriter();
         Map<String, Object> model = new HashMap<>();
@@ -89,6 +106,20 @@ public class NotificationService {
         model.put("taskId", event.getTaskId());
         try {
             configuration.getTemplate("newTask.ftlh")
+                    .process(model, stringWriter);
+            return stringWriter.getBuffer().toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getNewProjectEmailContent(NotificationEvent event) {
+        StringWriter stringWriter = new StringWriter();
+        Map<String, Object> model = new HashMap<>();
+        model.put("name", event.getUsername());
+        model.put("projectId", event.getProjectId());
+        try {
+            configuration.getTemplate("newProject.ftlh")
                     .process(model, stringWriter);
             return stringWriter.getBuffer().toString();
         } catch (Exception e) {
