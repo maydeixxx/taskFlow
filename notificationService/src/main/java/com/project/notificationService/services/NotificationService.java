@@ -50,12 +50,11 @@ public class NotificationService {
 
     private void sendReminderMail(NotificationEvent event) {
         String username = event.getUsername();
-        Long taskId = event.getTaskId();
         String email = event.getEmail();
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            helper.setSubject(String.format("You have task to do in 12 hours, %s!\nTask id: %s", username, taskId));
+            helper.setSubject(String.format("%s, you have task to do in 12 hours!", username));
             helper.setTo(email);
             String emailContent = getReminderEmailContent(event);
             helper.setText(emailContent, true);
@@ -67,12 +66,11 @@ public class NotificationService {
 
     private void sendNewTaskEmail(NotificationEvent event) {
         String username = event.getUsername();
-        Long taskId = event.getTaskId();
         String email = event.getEmail();
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "URF-8");
-            helper.setSubject(String.format("You have new task, %s! Task id: %s", username, taskId));
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            helper.setSubject(String.format("You have new task, %s!", username));
             helper.setTo(email);
             String content = getNewTaskEmailContent(event);
             helper.setText(content, true);

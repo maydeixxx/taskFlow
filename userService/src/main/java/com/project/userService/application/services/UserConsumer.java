@@ -33,7 +33,8 @@ public class UserConsumer {
     public void saveProjectToUser(ConsumerRecord<String, String> record) {
         try {
             log.info("Partition = {}", record.partition());
-            Collection<Long> userIds = objectMapper.readValue(record.key(), new TypeReference<>() {});
+            Collection<Long> userIds = objectMapper.readValue(record.key(), new TypeReference<>() {
+            });
             Long projectId = Long.parseLong(record.value());
             log.info("Received message in saveProjectToUser = {}, {}", userIds, projectId);
             userIds.forEach(id -> userService.addProjectToUser(id, projectId, 0));
@@ -43,7 +44,7 @@ public class UserConsumer {
                 users.add(userToMap(userService.findUserById(userId).orElseThrow()));
             }
             String message = objectMapper.writeValueAsString(users);
-            template.send("usernames", projectId.toString(), message);
+            template.send("projectUsernames", projectId.toString(), message);
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }
@@ -57,6 +58,15 @@ public class UserConsumer {
         Long userId = Long.parseLong(record.value());
         userService.addTaskToUser(userId, taskId);
         log.info("USERS UPDATED");
+        //send usernames to notification topic
+        try {
+            Map<String, Object> userData = userToMap(userService.findUserById(userId).orElseThrow());
+            String userDataString = objectMapper.writeValueAsString(userData);
+            template.send("taskUsernames", taskId.toString(), userDataString);
+        } catch (Exception e) {
+            log.error("Error : {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     public Map<String, Object> userToMap(User user) {

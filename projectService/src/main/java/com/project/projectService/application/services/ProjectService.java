@@ -41,7 +41,7 @@ public class ProjectService {
         }
     }
 
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "usernames", partitions = {"0"}), groupId = "usernames")
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "projectUsernames", partitions = {"0"}), groupId = "usernames")
     public void getUsernamesResponse(ConsumerRecord<String, String> record) {
         try {
             List<Map<String, Object>> users = objectMapper.readValue(record.value(), new TypeReference<>() {});

@@ -33,6 +33,17 @@ public class TaskProducer {
         }
     }
 
+    public void sendTaskToNotification(Map<String, Object> taskData, Map<String, Object> userData) {
+        try {
+            String userDataString = objectMapper.writeValueAsString(userData);
+            String taskDataString = objectMapper.writeValueAsString(taskData);
+            template.send("notificationHandler", 2, taskDataString, userDataString);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        log.info("Sent message to notificationHandler");
+    }
+
     public void sendCompletedTaskToAnalytics(Long taskId, TaskEntity task) {
         Map<String, Object> taskToMap = formatTaskToMap(task);
         try {

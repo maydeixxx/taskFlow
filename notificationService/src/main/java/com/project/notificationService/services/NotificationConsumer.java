@@ -11,10 +11,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,19 +45,35 @@ public class NotificationConsumer {
                     List<String> usernames = users.stream()
                             .map(user -> user.get("username").toString())
                             .toList();
-                    for (String username : usernames) {
-                        for (String email : emails) {
-                            NotificationEvent event = new NotificationEvent();
-                            event.setEmail(email);
-                            event.setUsername(username);
-                            event.setProjectId(projectId);
-                            event.setEventType("newProject");
-                            notificationService.sendMail(event);
-                            setNullEvent(event);
-                        }
+                    for (Map<String, Object> user : users) {
+                        NotificationEvent event = new NotificationEvent();
+                        event.setEventType("newProject");
+                        event.setUsername(getStringValue(user, "username"));
+                        event.setEmail(getStringValue(user, "email"));
+                        event.setProjectId(projectId);
+                        notificationService.sendMail(event);
                     }
                 }
 
+                case 2 -> {
+                    Map<String, Object> taskData = objectMapper.readValue(record.key(), new TypeReference<>() {});
+                    Map<String, Object> userData = objectMapper.readValue(record.value(), new TypeReference<>() {});
+                    String email = userData.get("email").toString();
+                    String username = userData.get("username").toString();
+                    String title = taskData.get("title").toString();
+                    Long taskId = Long.parseLong(taskData.get("id").toString());
+                    NotificationEvent event = new NotificationEvent();
+                    if (username != null || email != null) {
+                        event.setEventType("newTask");
+                        event.setTaskId(taskId);
+                        event.setTitle(title);
+                        event.setEmail(email);
+                        event.setUsername(username);
+                        notificationService.sendMail(event);
+                    } else {
+                        throw new NullPointerException("Email or username is null.");
+                    }
+                }
 
             }
         } catch (JsonProcessingException e) {
@@ -77,5 +91,13 @@ public class NotificationConsumer {
         event.setUsername(null);
         event.setTaskId(null);
         event.setDeadline(null);
+    }
+
+    private String getStringValue(Map<String, Object> data, String key) {
+        String dataString = null;
+        if (data.get(key) != null) {
+            dataString = data.get(key).toString();
+        }
+        return dataString;
     }
 }
