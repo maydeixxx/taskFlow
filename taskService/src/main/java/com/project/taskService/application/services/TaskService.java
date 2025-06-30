@@ -13,6 +13,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +38,7 @@ public class TaskService {
         Long projectId = task.getProjectId();
         Long memberId = task.getMemberId();
         String title = task.getTitle();
+        LocalDateTime deadline = task.getDeadline();
         producer.saveTaskToProject(projectId, taskId, memberId);
         //notification
         try {
@@ -43,7 +46,8 @@ public class TaskService {
             log.info("RECEIVED USER: {}", cachedUser);
             Map<String, Object> taskData = Map.of(
                     "id", taskId,
-                    "title", title
+                    "title", title,
+                    "deadline", deadline.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             );
             producer.sendTaskToNotification(taskData, cachedUser);
             cachedUser.clear();

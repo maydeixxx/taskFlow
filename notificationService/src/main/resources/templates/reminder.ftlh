@@ -95,7 +95,7 @@
     </div>
     <div class="content">
         <p>You have a pending task: "${title}".</p>
-        <p>Please complete it within the next 12 hours.</p>
+        <p>Please complete it within the next ${hoursRemaining} hours.</p>
         <a href="https://taskflow.example.com/tasks" class="button">View Tasks</a>
     </div>
     <div class="footer">

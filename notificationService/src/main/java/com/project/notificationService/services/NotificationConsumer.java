@@ -11,6 +11,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class NotificationConsumer {
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "notificationHandler", partitions = {"0, 1, 2, 3"}), groupId = "Notifications")
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "notificationHandler", partitions = {"0, 1, 2"}), groupId = "Notifications")
     private void handleNotifications(ConsumerRecord<String, String> record) {
         log.info("New message in topic notificationHandler. Partition: {}, Value: {}", record.partition(), record.value());
         try {
@@ -39,12 +40,6 @@ public class NotificationConsumer {
                 case 1 -> {
                     Long projectId = Long.parseLong(record.key());
                     List<Map<String, Object>> users = objectMapper.readValue(record.value(), new TypeReference<>() {});
-                    List<String> emails = users.stream()
-                            .map(user -> user.get("email").toString())
-                            .toList();
-                    List<String> usernames = users.stream()
-                            .map(user -> user.get("username").toString())
-                            .toList();
                     for (Map<String, Object> user : users) {
                         NotificationEvent event = new NotificationEvent();
                         event.setEventType("newProject");
@@ -62,9 +57,11 @@ public class NotificationConsumer {
                     String username = userData.get("username").toString();
                     String title = taskData.get("title").toString();
                     Long taskId = Long.parseLong(taskData.get("id").toString());
+                    LocalDateTime deadline = LocalDateTime.parse(taskData.get("deadline").toString());
                     NotificationEvent event = new NotificationEvent();
                     if (username != null || email != null) {
                         event.setEventType("newTask");
+                        event.setDeadline(deadline);
                         event.setTaskId(taskId);
                         event.setTitle(title);
                         event.setEmail(email);
@@ -74,23 +71,12 @@ public class NotificationConsumer {
                         throw new NullPointerException("Email or username is null.");
                     }
                 }
-
             }
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize message. Message: {}", e.getMessage());
         } catch (Exception e) {
             log.error("Failed to handle notification. Message: {}", e.getMessage());
         }
-    }
-
-    public void setNullEvent(NotificationEvent event) {
-        event.setProjectId(null);
-        event.setTitle(null);
-        event.setEmail(null);
-        event.setEventType(null);
-        event.setUsername(null);
-        event.setTaskId(null);
-        event.setDeadline(null);
     }
 
     private String getStringValue(Map<String, Object> data, String key) {

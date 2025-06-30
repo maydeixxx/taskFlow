@@ -2,7 +2,7 @@ package com.project.notificationService.models;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class NotificationEvent {
@@ -12,5 +12,6 @@ public class NotificationEvent {
     private Long taskId;
     private Long projectId;
     private String title;
-    private LocalDate deadline;
+    private LocalDateTime deadline;
+    private boolean reminderSent = false;
 }
