@@ -68,7 +68,7 @@ public class UserController {
         }
         User userById = userService.findUserById(id).orElseThrow();
         return ResponseEntity.ok().body(String.format("User successfully updated!\n Name: %s\n Email: %s\n Roles: %s"
-                , userById.getUserName(), userById.getEmail(), userById.getRoles()));
+                , userById.getUsername(), userById.getEmail(), userById.getRoles()));
     }
 
     @GetMapping("/all_users")

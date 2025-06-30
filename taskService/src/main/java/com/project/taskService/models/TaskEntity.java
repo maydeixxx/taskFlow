@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -24,7 +25,7 @@ public class TaskEntity {
     private String status; //TO_DO, IN_PROGRESS, DONE
 
     @Column(name = "deadline")
-    private LocalDate deadline;
+    private LocalDateTime deadline;
 
     @CollectionTable(name = "task_member",
                     joinColumns = @JoinColumn(name = "task_id")

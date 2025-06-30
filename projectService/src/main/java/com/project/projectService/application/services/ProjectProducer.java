@@ -14,4 +14,8 @@ public class ProjectProducer {
     public void sendNewProject(Collection<Long> userIds, Long projectId) {
         template.send("saveProjectToUser", 0, userIds.toString(), projectId.toString());
     }
+
+    public void sendNewProjectToNotification(Long projectId, String users) {
+        template.send("notificationHandler", 1, projectId.toString(), users);
+    }
 }

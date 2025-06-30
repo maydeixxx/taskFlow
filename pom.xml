@@ -16,6 +16,7 @@
         <module>projectService</module>
 		<module>taskService</module>
 		<module>analyticsService</module>
+		<module>notificationService</module>
 	</modules>
 	<groupId>com.project</groupId>
 	<artifactId>taskFlow</artifactId>
