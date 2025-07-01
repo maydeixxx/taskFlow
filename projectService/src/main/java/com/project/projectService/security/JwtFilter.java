@@ -1,4 +1,4 @@
-package com.project.projectService.application.security;
+package com.project.projectService.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;

@@ -182,7 +182,7 @@ public class NotificationService {
             long hoursRemaining = remaining.toHours();
             log.info("remaining: {} || HoursRemaining: {}", remaining, hoursRemaining);
 
-            if (hoursRemaining <= 12 && !event.isReminderSent() ) {
+            if (hoursRemaining <= 12 && hoursRemaining > 0 && !event.isReminderSent() ) {
                 event.setEventType("reminder");
                 sendReminderMail(event);
                 event.setReminderSent(true);

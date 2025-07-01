@@ -24,8 +24,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/delete_user/", "/users_roles/").hasRole("ADMIN")
-                        .requestMatchers("/all_users", "/user_id/").authenticated()
+                        .requestMatchers("/delete_user/**", "/users_roles/**", "/update_user/**").hasRole("ADMIN")
+                        .requestMatchers("/all_users", "/user_id/**").authenticated()
                         .requestMatchers("/auth", "/reg").permitAll()
                 )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,4 +1,4 @@
-package com.project.projectService.application.security;
+package com.project.projectService.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -11,7 +11,7 @@ import java.util.List;
 public class JwtService {
 
     @Value("${token.signing.key}")
-    private String token;
+    private String jwt;
 
     public String getUsernameFromToken(String token) {
         return getFromToken(token).getSubject();
@@ -23,6 +23,7 @@ public class JwtService {
 
     public Claims getFromToken(String token) {
         return Jwts.parser()
+                .setSigningKey(jwt)
                 .parseClaimsJws(token)
                 .getBody();
     }

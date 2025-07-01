@@ -1,7 +1,5 @@
 package com.project.userService.api.components;
 
-import com.project.userService.models.Role;
-import com.project.userService.models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

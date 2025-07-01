@@ -4,7 +4,6 @@ spring:
 
   cloud:
     gateway:
-      mvc:
         routes:
           - id: userService
             uri: lb://userService

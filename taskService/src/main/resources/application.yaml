@@ -28,7 +28,6 @@ spring:
   token:
     signing:
       key: ${JWT_SIGNING_KEY}
-      lifetime: ${JWT_TOKEN_LIFETIME}
 
 server:
   port: 8083

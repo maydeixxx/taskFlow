@@ -12,12 +12,10 @@ import java.util.List;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
-
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                //Отключение CORS
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+                // Своего рода отключение CORS (разрешение запросов со всех доменов)
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setAllowedOriginPatterns(List.of("*"));
@@ -26,11 +24,10 @@ public class SecurityConfiguration {
                     corsConfiguration.setAllowCredentials(true);
                     return corsConfiguration;
                 }))
-                //Доступ к эндпоинтам
+                // Настройка доступа к конечным точкам
                 .authorizeExchange(request -> request
                         .anyExchange().permitAll()
                 );
-        return httpSecurity.build();
+        return http.build();
     }
-
 }
