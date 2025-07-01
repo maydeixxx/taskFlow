@@ -187,6 +187,8 @@ public class NotificationService {
                 sendReminderMail(event);
                 event.setReminderSent(true);
                 log.info("Sent reminder for taskId {} to {}, remaining {} hours", taskId, event.getEmail(), hoursRemaining);
+                log.info("removed task {}", taskId);
+                return true;
             } else if (hoursRemaining <= 0) {
                 log.info("Removed expired taskId {} from reminders", taskId);
                 return true;

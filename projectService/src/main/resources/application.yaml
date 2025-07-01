@@ -25,5 +25,10 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
+token:
+  signing:
+    key: ${JWT_SIGNING_KEY}
+    lifetime: ${JWT_TOKEN_LIFETIME}
+
 server:
   port: 8082
