@@ -66,11 +66,19 @@ public class NotificationService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             long hoursRemaining = Duration.between(LocalDateTime.now(), event.getDeadline()).toHours();
-            helper.setSubject(String.format("%s, you have %d hours to complete the task!", username, hoursRemaining));
-            helper.setTo(email);
             String emailContent = getReminderEmailContent(event);
             helper.setText(emailContent, true);
-            mailSender.send(mimeMessage);
+            helper.setTo(email);
+            if (hoursRemaining <= 12 && hoursRemaining > 0) {
+                helper.setSubject(String.format("%s, you have %d hours to complete the task!", username, hoursRemaining));
+                mailSender.send(mimeMessage);
+            } else {
+                helper.setSubject("Complete it soonest please");
+                helper.setTo(email);
+                mailSender.send(mimeMessage);
+                log.info("Sent reminder expired task");
+            }
+
         } catch (MessagingException e) {
             log.error("Failed to send reminder email to {}: {}", event.getEmail(), e.getMessage());
             throw new RuntimeException("Failed to send reminder email", e);
@@ -156,17 +164,21 @@ public class NotificationService {
     private String getReminderEmailContent(NotificationEvent event) {
         StringWriter stringWriter = new StringWriter();
         Map<String, Object> model = new HashMap<>();
-        Duration remaining = Duration.between(LocalDateTime.now(), event.getDeadline());
-        long hoursRemaining = remaining.toHours();
-        model.put("name", event.getUsername());
-        model.put("title", event.getTitle());
-        model.put("hoursRemaining", hoursRemaining);
         try {
-            configuration.getTemplate("reminder.ftlh").process(model, stringWriter);
+            Duration remaining = Duration.between(LocalDateTime.now(), event.getDeadline());
+            long hoursRemaining = remaining.toHours();
+            model.put("name", event.getUsername());
+            if (hoursRemaining <= 12 && hoursRemaining > 0) {
+                model.put("title", event.getTitle());
+                model.put("hoursRemaining", hoursRemaining);
+                configuration.getTemplate("reminder.ftlh", "UTF-8").process(model, stringWriter);
+            } else {
+                model.put("taskId", event.getTaskId());
+                configuration.getTemplate("expiredTask.ftlh", "UTF-8").process(model, stringWriter);
+            }
             return stringWriter.getBuffer().toString();
         } catch (Exception e) {
-            log.error("Failed to process reminder email template: {}", e.getMessage());
-            throw new RuntimeException("Failed to process reminder email template", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -182,14 +194,16 @@ public class NotificationService {
             long hoursRemaining = remaining.toHours();
             log.info("remaining: {} || HoursRemaining: {}", remaining, hoursRemaining);
 
-            if (hoursRemaining <= 12 && hoursRemaining > 0 && !event.isReminderSent() ) {
-                event.setEventType("reminder");
+            event.setEventType("reminder");
+            if (hoursRemaining <= 12 && hoursRemaining > 0 && !event.isReminderSent()) {
                 sendReminderMail(event);
                 event.setReminderSent(true);
                 log.info("Sent reminder for taskId {} to {}, remaining {} hours", taskId, event.getEmail(), hoursRemaining);
                 log.info("removed task {}", taskId);
                 return true;
             } else if (hoursRemaining <= 0) {
+                sendReminderMail(event);
+                event.setReminderSent(true);
                 log.info("Removed expired taskId {} from reminders", taskId);
                 return true;
             }
