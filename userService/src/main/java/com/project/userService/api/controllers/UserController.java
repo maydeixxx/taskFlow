@@ -27,7 +27,7 @@ public class UserController {
             return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), "пароли не совпадают", new Date()), HttpStatus.BAD_REQUEST);
         }
         if (userService.findByUsername(regUser.getUserName()).isPresent()) {
-            return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "пользователь с таким именем уже сущетсвует", new Date()), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "пользователь с таким именем уже существует", new Date()), HttpStatus.UNAUTHORIZED);
         }
         userService.saveUser(regUser);
         return ResponseEntity.ok().body(String.format("%s, вы успешно зарегистрировались!", regUser.getUserName()));
