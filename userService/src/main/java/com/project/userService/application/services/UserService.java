@@ -2,12 +2,13 @@ package com.project.userService.application.services;
 
 import com.project.userService.api.DTOs.UpdateUserDTO;
 import com.project.userService.api.DTOs.UserDTO;
+import com.project.userService.api.exceptions.DatabaseException;
+import com.project.userService.api.exceptions.UserNotFoundException;
 import com.project.userService.application.interfaces.RoleRepository;
 import com.project.userService.application.interfaces.UserRepository;
 import com.project.userService.models.Role;
 import com.project.userService.models.User;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -35,33 +36,47 @@ public class UserService implements UserDetailsService {
         user.setUsername(regUser.getUserName());
         user.setEmail(regUser.getEmail());
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
-        User savedUser = userRepository.save(user);
-        producer.sendRegisteredUser(savedUser);
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        } finally {
+            producer.sendRegisteredUser(user);
+        }
     }
 
     public void deleteUser(Long id) {
-        userRepository.delete(userRepository.findUserById(id).orElseThrow());
+        try {
+            userRepository.delete(userRepository.findUserById(id).orElseThrow());
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 
     public List<User> findAllUsers() {
-        return userRepository.findAll();
+        List<User> all = userRepository.findAll();
+        if (all.isEmpty()) {
+            throw new UserNotFoundException("users not found");
+        } else {
+            return all;
+        }
     }
 
-    public Optional<User> findUserById(Long id) {
-        return userRepository.findUserById(id);
+    public User findUserById(Long id) {
+        return userRepository.findUserById(id).orElseThrow(() -> new UserNotFoundException(String.format("User by id[%s] not found", id)));
     }
 
-    public Optional<List<User>> findUsersByRole(Role role) {
-        return userRepository.findUsersByRoles(role);
+    public List<User> findUsersByRole(Role role) {
+        return userRepository.findUsersByRoles(role).orElseThrow(() -> new UserNotFoundException(String.format("Users by role[%s] not found", role)));
     }
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(String.format("User by name[%s] not found", username)));
     }
 
     @Transactional
     public void updateUser(Long id, UpdateUserDTO userDTO) {
-        User user = userRepository.findUserById(id).orElseThrow();
+        User user = userRepository.findUserById(id).orElseThrow(() -> new UserNotFoundException(String.format("User by id[%s] not found", id)));
         if (userDTO.getPassword() != null) {
             user.setPassword(userDTO.getPassword());
         }
@@ -89,9 +104,7 @@ public class UserService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(
-                String.format("User '%s' not found", username)
-        ));
+        User user = findByUsername(username);
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
@@ -100,7 +113,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void addProjectToUser(Long userId, Long projectId, int partition) {
-        User user = userRepository.findUserById(userId).orElseThrow();
+        User user = userRepository.findUserById(userId).orElseThrow(() -> new UserNotFoundException(String.format("User by id[%s] not found", userId)));
         Collection<Long> projects = user.getProjects();
         if (projects.contains(projectId)) {
             throw new IllegalArgumentException("Project already contains in your list");
@@ -114,7 +127,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void removeProjectFromUser(Long userId, Long projectId) {
-        User user = userRepository.findUserById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findUserById(userId).orElseThrow(() -> new UserNotFoundException(String.format("User by id[%s] not found", userId)));
         Collection<Long> projects = user.getProjects();
         if (!projects.contains(projectId)) {
             throw new IllegalArgumentException("Project already removed");
@@ -125,7 +138,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void addTaskToUser(Long userId, Long taskId) {
-        User user = userRepository.findUserById(userId).orElseThrow(() -> new NotFoundException(String.format("User %s not found", userId)));
+        User user = userRepository.findUserById(userId).orElseThrow(() -> new UserNotFoundException(String.format("User by id[%s] not found", userId)));
         if (user.getTaskId() != null) {
             throw new IllegalArgumentException("User already have task");
         }

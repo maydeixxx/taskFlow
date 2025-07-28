@@ -1,11 +1,10 @@
 package com.project.userService.application.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.userService.api.exceptions.KafkaException;
 import com.project.userService.models.User;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -41,12 +40,12 @@ public class UserConsumer {
             //send usernames back to topic
             List<Map<String, Object>> users = new ArrayList<>();
             for (Long userId : userIds) {
-                users.add(userToMap(userService.findUserById(userId).orElseThrow()));
+                users.add(userToMap(userService.findUserById(userId)));
             }
             String message = objectMapper.writeValueAsString(users);
             template.send("projectUsernames", projectId.toString(), message);
         } catch (Exception e) {
-            log.error("Error: {}", e.getMessage());
+            throw new KafkaException(e.getMessage());
         }
     }
 
@@ -60,12 +59,11 @@ public class UserConsumer {
         log.info("USERS UPDATED");
         //send usernames to notification topic
         try {
-            Map<String, Object> userData = userToMap(userService.findUserById(userId).orElseThrow());
+            Map<String, Object> userData = userToMap(userService.findUserById(userId));
             String userDataString = objectMapper.writeValueAsString(userData);
             template.send("taskUsernames", taskId.toString(), userDataString);
         } catch (Exception e) {
-            log.error("Error : {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw new KafkaException(e.getMessage());
         }
     }
 

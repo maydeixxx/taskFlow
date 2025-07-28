@@ -2,6 +2,7 @@ package com.project.userService.application.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.userService.api.exceptions.KafkaException;
 import com.project.userService.models.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,11 @@ public class UserProducer {
     private final ObjectMapper objectMapper;
 
     public void sendUserToSubscribe(Long userId, Long projectId) {
-        template.send("saveProjectToUser", 1, userId.toString(), projectId.toString());
+        try {
+            template.send("saveProjectToUser", 1, userId.toString(), projectId.toString());
+        } catch (Exception e) {
+            throw new KafkaException(e.getMessage());
+        }
     }
 
     public void sendRegisteredUser(User user) {
@@ -27,7 +32,7 @@ public class UserProducer {
             String message = objectMapper.writeValueAsString(data);
             template.send("notificationHandler", 0, user.getId().toString(), message);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new KafkaException(e.getMessage());
         }
     }
 

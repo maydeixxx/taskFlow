@@ -1,8 +1,9 @@
 package com.project.userService.api.controllers;
 
-import com.project.userService.api.DTOs.AppError;
 import com.project.userService.api.DTOs.UpdateUserDTO;
 import com.project.userService.api.DTOs.UserDTO;
+import com.project.userService.api.exceptions.PasswordIncorrectException;
+import com.project.userService.api.exceptions.UserAlreadyExists;
 import com.project.userService.application.services.UserService;
 import com.project.userService.models.Role;
 import com.project.userService.models.User;
@@ -24,13 +25,13 @@ public class UserController {
     @PostMapping("/reg")
     public ResponseEntity<?> regUser(@RequestBody UserDTO regUser) {
         if (!regUser.getPassword().equals(regUser.getConfirmPassword())) {
-            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), "пароли не совпадают", new Date()), HttpStatus.BAD_REQUEST);
+            throw new PasswordIncorrectException("password is wrong");
         }
-        if (userService.findByUsername(regUser.getUserName()).isPresent()) {
-            return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "пользователь с таким именем уже существует", new Date()), HttpStatus.UNAUTHORIZED);
+        if (userService.findByUsername(regUser.getUserName()) != null) {
+            throw new UserAlreadyExists(String.format("user with name[%s] already exists", regUser.getUserName()));
         }
         userService.saveUser(regUser);
-        return ResponseEntity.ok().body(String.format("%s, вы успешно зарегистрировались!", regUser.getUserName()));
+        return ResponseEntity.ok().body(String.format("%s, you successfully registered", regUser.getUserName()));
     }
 
     @PutMapping("/add_project/{userId}/{projectId}")
@@ -66,7 +67,7 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        User userById = userService.findUserById(id).orElseThrow();
+        User userById = userService.findUserById(id);
         return ResponseEntity.ok().body(String.format("User successfully updated!\n Name: %s\n Email: %s\n Roles: %s"
                 , userById.getUsername(), userById.getEmail(), userById.getRoles()));
     }
@@ -78,14 +79,14 @@ public class UserController {
 
     @GetMapping("/user_id/{id}")
     public ResponseEntity<?> findUserById(@PathVariable Long id) {
-        User user = userService.findUserById(id).orElseThrow(() -> new IllegalArgumentException(String.format("User with id = %s not found", id)));
+        User user = userService.findUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/users_roles/{role}")
     public ResponseEntity<?> findUserByRole(@PathVariable Role role) {
         try {
-            return ResponseEntity.ok(userService.findUsersByRole(role).orElseThrow());
+            return ResponseEntity.ok(userService.findUsersByRole(role));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
